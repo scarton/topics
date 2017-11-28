@@ -69,7 +69,7 @@ public class LDARun {
 		Dataset<Row> topics = model.describeTopics(3);
 		logger.info("The topics described by their top-weighted terms:");
 		topics.takeAsList(10).forEach(f -> logger.info("{}",f));
-		topics.show(false);
+//		topics.show(false);
 
 		// Shows the result.
 		Dataset<Row> transformed = model.transform(featurizedData);
