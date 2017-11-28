@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.spark.ml.clustering.LDA;
 import org.apache.spark.ml.clustering.LDAModel;
 import org.apache.spark.ml.feature.HashingTF;
 import org.apache.spark.sql.Dataset;
@@ -28,11 +29,11 @@ import com.sc3.topics.util.Util;
  * @date Nov 18, 2017
  *
  */
-public class LDA {
+public class LDARun {
 	static {
 		System.setProperty("log.file", "LDA");
 	}
-	final static Logger logger = LoggerFactory.getLogger(LDA.class);
+	final static Logger logger = LoggerFactory.getLogger(LDARun.class);
 	
 	public static void main(String[] args) throws IOException {
 		Props props = new Props();
@@ -52,7 +53,7 @@ public class LDA {
 				.transform(textData)
 				.cache();
 		
-		org.apache.spark.ml.clustering.LDA lda = new org.apache.spark.ml.clustering.LDA()
+		LDA lda = new LDA()
 				.setFeaturesCol("rawFeatures")
 				.setK(props.k())
 				.setMaxIter(props.iterations());
@@ -60,17 +61,20 @@ public class LDA {
 
 		double ll = model.logLikelihood(featurizedData);
 		double lp = model.logPerplexity(featurizedData);
-		System.out.println("The lower bound on the log likelihood of the entire corpus: " + ll);
-		System.out.println("The upper bound on perplexity: " + lp);
+		logger.info("The lower bound on the log likelihood of the entire corpus: " + ll);
+		logger.info("The upper bound on perplexity: " + lp);
 
 		// Describe topics.
 		Dataset<Row> topics = model.describeTopics(3);
-		System.out.println("The topics described by their top-weighted terms:");
+		logger.info("The topics described by their top-weighted terms:");
+		topics.foreach(f -> logger.info("{}",f));
 		topics.show(false);
 
 		// Shows the result.
 		Dataset<Row> transformed = model.transform(featurizedData);
-		transformed.show(false);		ss.stop();
+		transformed.foreach(f -> logger.info("{}",f));
+		transformed.show(false);
+		ss.stop();
 		stopWatch.stop();
 		logger.info("End of LDA. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));
 		System.out.println("End of LDA. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));

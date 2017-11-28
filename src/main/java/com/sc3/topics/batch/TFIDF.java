@@ -38,14 +38,20 @@ public class TFIDF {
 		  .setNumFeatures(props.features());
 		
 		Dataset<Row> featurizedData = hashingTF.transform(textData);
-		// alternatively, CountVectorizer can also be used to get term frequency vectors
+		featurizedData
+			.select("id", "rawFeatures")
+			.foreach(f -> logger.info("{}",f));
 		
-		IDF idf = new IDF().setInputCol("rawFeatures").setOutputCol("features");
+		IDF idf = new IDF()
+				.setInputCol("rawFeatures")
+				.setOutputCol("features");
 		IDFModel idfModel = idf.fit(featurizedData);
-		
+
 		Dataset<Row> rescaledData = idfModel.transform(featurizedData);
-		rescaledData.select("id", "rawFeatures").show(10,false);
-		rescaledData.select("id", "features").show(10,false);
+		rescaledData
+			.select("id", "features")
+			.foreach(f -> logger.info("{}",f));
+
 		ss.stop();
 		logger.info("End of TFIDF. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));
 		System.out.println("End of TFIDF. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));

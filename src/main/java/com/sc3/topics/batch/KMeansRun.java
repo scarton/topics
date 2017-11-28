@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.spark.ml.clustering.KMeans;
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.feature.HashingTF;
 import org.apache.spark.ml.feature.IDF;
@@ -31,11 +32,11 @@ import com.sc3.topics.util.Util;
  * @date Nov 18, 2017
  *
  */
-public class KMeans {
+public class KMeansRun {
 	static {
 		System.setProperty("log.file", "KMeans");
 	}
-	final static Logger logger = LoggerFactory.getLogger(KMeans.class);
+	final static Logger logger = LoggerFactory.getLogger(KMeansRun.class);
 	
 	public static void main(String[] args) throws IOException {
 		Props props = new Props();
@@ -58,19 +59,19 @@ public class KMeans {
 		Dataset<Row> rescaledData = idfModel
 				.transform(featurizedData)
 				.cache();
-		org.apache.spark.ml.clustering.KMeans kmeans = new org.apache.spark.ml.clustering.KMeans()
+		KMeans kmeans = new KMeans()
 				.setK(props.k())
 				.setMaxIter(props.iterations())
 				.setSeed(1L);
 		KMeansModel model = kmeans.fit(rescaledData);
 		double WSSSE = model.computeCost(rescaledData);
-		System.out.println("Within Set Sum of Squared Errors = " + WSSSE);
+		logger.info("Within Set Sum of Squared Errors = " + WSSSE);
 
 		// Shows the result.
 		Vector[] centers = model.clusterCenters();
-		System.out.println("Cluster Centers: ");
+		logger.info("Cluster Centers: ");
 		for (Vector center: centers) {
-		  System.out.println(center);
+			logger.info("{}",center);
 		}
 		ss.stop();
 		stopWatch.stop();
