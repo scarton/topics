@@ -48,7 +48,8 @@ public class LDARun {
 				  .setInputCol("tokens")
 				  .setOutputCol("rawFeatures")
 				  .setNumFeatures(props.features());
-				
+
+		// Only need TF counts - not TF/IDF scores, so stop there.
 		Dataset<Row> featurizedData = hashingTF
 				.transform(textData)
 				.cache();
@@ -67,13 +68,13 @@ public class LDARun {
 		// Describe topics.
 		Dataset<Row> topics = model.describeTopics(3);
 		logger.info("The topics described by their top-weighted terms:");
-		topics.foreach(f -> logger.info("{}",f));
+		topics.takeAsList(10).forEach(f -> logger.info("{}",f));
 		topics.show(false);
 
 		// Shows the result.
 		Dataset<Row> transformed = model.transform(featurizedData);
-		transformed.foreach(f -> logger.info("{}",f));
-		transformed.show(false);
+		transformed.takeAsList(10).forEach(f -> logger.info("{}",f));
+//		transformed.show(false);
 		ss.stop();
 		stopWatch.stop();
 		logger.info("End of LDA. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));
