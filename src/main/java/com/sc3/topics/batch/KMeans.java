@@ -63,7 +63,8 @@ public class KMeans {
 		System.out.println("Cluster Centers: ");
 		for (Vector center: centers) {
 		  System.out.println(center);
-		}		ss.stop();
+		}
+		ss.stop();
 		stopWatch.stop();
 		logger.info("End of KMeans. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));
 		System.out.println("End of KMeans. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));

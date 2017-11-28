@@ -1,6 +1,7 @@
 package com.sc3.topics.batch;
 import java.io.IOException;
 
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.spark.ml.feature.HashingTF;
 import org.apache.spark.ml.feature.IDF;
@@ -45,5 +46,7 @@ public class TFIDF {
 		Dataset<Row> rescaledData = idfModel.transform(featurizedData);
 		rescaledData.select("id", "features").show(10,false);
 		ss.stop();
+		logger.info("End of TFIDF. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));
+		System.out.println("End of TFIDF. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));
 	}
 }
