@@ -44,6 +44,7 @@ public class TFIDF {
 		IDFModel idfModel = idf.fit(featurizedData);
 		
 		Dataset<Row> rescaledData = idfModel.transform(featurizedData);
+		rescaledData.select("id", "rawFeatures").show(10,false);
 		rescaledData.select("id", "features").show(10,false);
 		ss.stop();
 		logger.info("End of TFIDF. Elapsed time: "+DurationFormatUtils.formatDuration(stopWatch.getTime(), "HH:mm:ss.S"));

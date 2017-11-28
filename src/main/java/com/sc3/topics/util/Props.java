@@ -284,4 +284,10 @@ public class Props extends Properties {
 	public int features() {
 		return getInt("features", 10000);
 	}
+	public int k() {
+		return getInt("k", 2);
+	}
+	public int iterations() {
+		return getInt("iterations", 100);
+	}
 }

@@ -20,6 +20,13 @@ import com.sc3.topics.util.TDF;
 import com.sc3.topics.util.Util;
 
 /**
+ * Sample KMeans clustering. 
+ * Arguments specified as properties:
+ * -Dthreads=2
+ * -DLog.Path=/home/steve/logs
+ * -Dsource.path=/home/steve/data/enron-clean
+ * -Dk=2
+ * -Diterations=100
  * @author stephen.carton@gmail.com
  * @date Nov 18, 2017
  *
@@ -37,7 +44,7 @@ public class KMeans {
 		stopWatch.start();
 		logger.info("Starting KMeans Clustering");
 	
-		SparkSession ss = Util.createSparkSession(props, "TFIDF");
+		SparkSession ss = Util.createSparkSession(props, "KMeans");
 		Dataset<Row> textData = TDF.loadDataSet(props, ss);
 		HashingTF hashingTF = new HashingTF()
 				  .setInputCol("tokens")
@@ -45,15 +52,16 @@ public class KMeans {
 				  .setNumFeatures(props.features());
 				
 		Dataset<Row> featurizedData = hashingTF.transform(textData);
-		// alternatively, CountVectorizer can also be used to get term frequency vectors
-		
 		IDF idf = new IDF().setInputCol("rawFeatures").setOutputCol("features");
 		IDFModel idfModel = idf.fit(featurizedData);
 		
 		Dataset<Row> rescaledData = idfModel
 				.transform(featurizedData)
 				.cache();
-		org.apache.spark.ml.clustering.KMeans kmeans = new org.apache.spark.ml.clustering.KMeans().setK(2).setSeed(1L);
+		org.apache.spark.ml.clustering.KMeans kmeans = new org.apache.spark.ml.clustering.KMeans()
+				.setK(props.k())
+				.setMaxIter(props.iterations())
+				.setSeed(1L);
 		KMeansModel model = kmeans.fit(rescaledData);
 		double WSSSE = model.computeCost(rescaledData);
 		System.out.println("Within Set Sum of Squared Errors = " + WSSSE);
