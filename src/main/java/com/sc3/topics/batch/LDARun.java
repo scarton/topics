@@ -51,22 +51,22 @@ public class LDARun {
 				  .setOutputCol("rawFeatures")
 				  .setNumFeatures(props.features());
 
-		Dataset<Row> featurizedData = hashingTF.transform(textData);
+		Dataset<Row> tfData = hashingTF.transform(textData);
 		IDF idf = new IDF().setInputCol("rawFeatures").setOutputCol("features");
-		IDFModel idfModel = idf.fit(featurizedData);
+		IDFModel idfModel = idf.fit(tfData);
 		
-		Dataset<Row> rescaledData = idfModel
-				.transform(featurizedData)
+		Dataset<Row> tfidfData = idfModel
+				.transform(tfData)
 				.cache();
 
 		LDA lda = new LDA()
 				.setFeaturesCol("features")
 				.setK(props.k())
 				.setMaxIter(props.iterations());
-		LDAModel model = lda.fit(rescaledData);
+		LDAModel model = lda.fit(tfidfData);
 
-		double ll = model.logLikelihood(rescaledData);
-		double lp = model.logPerplexity(rescaledData);
+		double ll = model.logLikelihood(tfidfData);
+		double lp = model.logPerplexity(tfidfData);
 		logger.info("The lower bound on the log likelihood of the entire corpus: " + ll);
 		logger.info("The upper bound on perplexity: " + lp);
 
@@ -77,7 +77,7 @@ public class LDARun {
 //		topics.show(false);
 
 		// Shows the result.
-		Dataset<Row> transformed = model.transform(featurizedData);
+		Dataset<Row> transformed = model.transform(tfidfData);
 		transformed.takeAsList(10).forEach(f -> logger.info("{}",f));
 //		transformed.show(false);
 		ss.stop();
