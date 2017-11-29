@@ -32,11 +32,11 @@ import com.sc3.topics.util.Util;
  * @date Nov 18, 2017
  *
  */
-public class LDARun {
+public class LDANgramRun {
 	static {
-		System.setProperty("log.file", "LDA");
+		System.setProperty("log.file", "LDANgram");
 	}
-	final static Logger logger = LoggerFactory.getLogger(LDARun.class);
+	final static Logger logger = LoggerFactory.getLogger(LDANgramRun.class);
 	
 	public static void main(String[] args) throws IOException {
 		Props props = new Props();
@@ -45,8 +45,8 @@ public class LDARun {
 		stopWatch.start();
 		logger.info("Starting LDA Clustering");
 	
-		SparkSession ss = Util.createSparkSession(props, "LDA");
-		Dataset<Row> textData = TDF.loadDataSet(props, ss);
+		SparkSession ss = Util.createSparkSession(props, "LDANgramRun");
+		Dataset<Row> textData = TDF.loadDataSetAsNgrams(props, ss);
 		HashingTF hashingTF = new HashingTF()
 				  .setInputCol("tokens")
 				  .setOutputCol("rawFeatures")

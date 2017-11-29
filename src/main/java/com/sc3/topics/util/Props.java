@@ -290,4 +290,7 @@ public class Props extends Properties {
 	public int iterations() {
 		return getInt("iterations", 100);
 	}
+	public int ngramWidth() {
+		return getInt("ngram.width", 3);
+	}
 }
