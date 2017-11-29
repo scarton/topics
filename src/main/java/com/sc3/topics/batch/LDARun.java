@@ -7,6 +7,8 @@ import org.apache.commons.lang.time.StopWatch;
 import org.apache.spark.ml.clustering.LDA;
 import org.apache.spark.ml.clustering.LDAModel;
 import org.apache.spark.ml.feature.HashingTF;
+import org.apache.spark.ml.feature.IDF;
+import org.apache.spark.ml.feature.IDFModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -49,19 +51,22 @@ public class LDARun {
 				  .setOutputCol("rawFeatures")
 				  .setNumFeatures(props.features());
 
-		// Only need TF counts - not TF/IDF scores, so stop there.
-		Dataset<Row> featurizedData = hashingTF
-				.transform(textData)
-				.cache();
+		Dataset<Row> featurizedData = hashingTF.transform(textData);
+		IDF idf = new IDF().setInputCol("rawFeatures").setOutputCol("features");
+		IDFModel idfModel = idf.fit(featurizedData);
 		
+		Dataset<Row> rescaledData = idfModel
+				.transform(featurizedData)
+				.cache();
+
 		LDA lda = new LDA()
-				.setFeaturesCol("rawFeatures")
+				.setFeaturesCol("features")
 				.setK(props.k())
 				.setMaxIter(props.iterations());
-		LDAModel model = lda.fit(featurizedData);
+		LDAModel model = lda.fit(rescaledData);
 
-		double ll = model.logLikelihood(featurizedData);
-		double lp = model.logPerplexity(featurizedData);
+		double ll = model.logLikelihood(rescaledData);
+		double lp = model.logPerplexity(rescaledData);
 		logger.info("The lower bound on the log likelihood of the entire corpus: " + ll);
 		logger.info("The upper bound on perplexity: " + lp);
 
