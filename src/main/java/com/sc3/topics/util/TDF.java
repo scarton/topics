@@ -100,4 +100,7 @@ public final class TDF {
 		Dataset<Row> textData = ss.createDataFrame(tokensRDD, TextStuff.class);
 		return textData;
 	}
+	public static final void log(Row r) {
+		
+	}
 }
